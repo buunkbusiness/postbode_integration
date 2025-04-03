@@ -1,0 +1,79 @@
+{
+  "actions": [],
+  "autoname": "hash",
+  "creation": "2023-07-01 12:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "letter",
+    "action",
+    "status",
+    "creation",
+    "response_section",
+    "response_data"
+  ],
+  "fields": [
+    {
+      "fieldname": "letter",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Letter",
+      "options": "Postbode Letter",
+      "reqd": 1
+    },
+    {
+      "fieldname": "action",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Action",
+      "reqd": 1
+    },
+    {
+      "fieldname": "status",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Status",
+      "reqd": 1
+    },
+    {
+      "fieldname": "creation",
+      "fieldtype": "Datetime",
+      "in_list_view": 1,
+      "label": "Timestamp",
+      "read_only": 1
+    },
+    {
+      "fieldname": "response_section",
+      "fieldtype": "Section Break",
+      "label": "API Response"
+    },
+    {
+      "fieldname": "response_data",
+      "fieldtype": "Code",
+      "label": "Response Data",
+      "options": "JSON"
+    }
+  ],
+  "links": [],
+  "modified": "2023-07-01 12:00:00.000000",
+  "module": "Postbode for Frappe",
+  "name": "Postbode Letter Log",
+  "naming_rule": "Random",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 0,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 0
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC"
+}

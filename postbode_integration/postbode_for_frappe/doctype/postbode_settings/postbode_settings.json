@@ -1,0 +1,146 @@
+{
+ "actions": [],
+ "creation": "2023-07-01 12:00:00",
+ "default_view": "List",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "api_key_section",
+  "api_key",
+  "customer_code",
+  "environment",
+  "cb_1",
+  "enabled",
+  "envelope_section",
+  "default_envelope_uuid",
+  "default_sender_section",
+  "default_sender_name",
+  "default_sender_company",
+  "cb_2",
+  "default_sender_address",
+  "default_sender_postal_code",
+  "default_sender_city",
+  "default_sender_country"
+ ],
+ "fields": [
+  {
+   "fieldname": "api_key_section",
+   "fieldtype": "Section Break",
+   "label": "API Configuration"
+  },
+  {
+   "fieldname": "api_key",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Postbode API Key",
+   "reqd": 1
+  },
+  {
+   "description": "The customer code of your Postbode mailbox",
+   "fieldname": "customer_code",
+   "fieldtype": "Data",
+   "label": "Customer Code",
+   "reqd": 1
+  },
+  {
+   "default": "Test",
+   "fieldname": "environment",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Environment",
+   "options": "Test\nProduction",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "envelope_section",
+   "fieldtype": "Section Break",
+   "label": "Envelope Settings"
+  },
+  {
+   "fieldname": "default_envelope_uuid",
+   "fieldtype": "Data",
+   "label": "Default Envelope UUID",
+   "description": "UUID of the default envelope to use for letters"
+  },
+  {
+   "fieldname": "default_sender_section",
+   "fieldtype": "Section Break",
+   "label": "Default Sender Information"
+  },
+  {
+   "fieldname": "default_sender_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "default_sender_company",
+   "fieldtype": "Data",
+   "label": "Company"
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_sender_address",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Address",
+   "reqd": 1
+  },
+  {
+   "fieldname": "default_sender_postal_code",
+   "fieldtype": "Data",
+   "label": "Postal Code",
+   "reqd": 1
+  },
+  {
+   "fieldname": "default_sender_city",
+   "fieldtype": "Data",
+   "label": "City",
+   "reqd": 1
+  },
+  {
+   "fieldname": "default_sender_country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country",
+   "reqd": 1
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-04-03 13:33:20.352619",
+ "modified_by": "Administrator",
+ "module": "Postbode for Frappe",
+ "name": "Postbode Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

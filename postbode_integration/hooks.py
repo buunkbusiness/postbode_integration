@@ -142,24 +142,15 @@ app_license = "mit"
 
 # Scheduled Tasks
 # ---------------
+scheduler_events = {
+    "hourly": [
+        "postbode_integration.tasks.update_letter_status"
+    ]
+}
 
-# scheduler_events = {
-# 	"all": [
-# 		"postbode_integration.tasks.all"
-# 	],
-# 	"daily": [
-# 		"postbode_integration.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"postbode_integration.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"postbode_integration.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"postbode_integration.tasks.monthly"
-# 	],
-# }
+# Add after_install and on_session_creation hooks
+after_install = "postbode_integration.setup.setup_postbode_client"
+on_session_creation = "postbode_integration.setup.setup_postbode_client"
 
 # Testing
 # -------
