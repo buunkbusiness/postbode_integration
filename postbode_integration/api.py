@@ -19,10 +19,21 @@ def send_letter(letter_id=None, doctype=None, docname=None, recipients=None, con
         Dict with status and message
     """
     try:
+        # Validate inputs
+        if not letter_id and not (doctype and docname):
+            frappe.throw(_("Either letter_id or doctype and docname must be provided"))
+        
+        # Log the inputs for debugging
+        frappe.logger().debug(f"send_letter called with letter_id={letter_id}, doctype={doctype}, docname={docname}")
+        
         # Case 1: Sending an existing letter
         if letter_id:
             letter = frappe.get_doc("Postbode Letter", letter_id)
             response = letter.send_letter()
+            
+            # Log the response for debugging
+            frappe.logger().debug(f"Letter sent successfully: {response}")
+            
             return {
                 "status": "success",
                 "message": _("Letter sent successfully"),
@@ -66,6 +77,9 @@ def send_letter(letter_id=None, doctype=None, docname=None, recipients=None, con
             
             # Send the letter
             response = letter.send_letter()
+            
+            # Log the response for debugging
+            frappe.logger().debug(f"Letter sent successfully: {response}")
             
             return {
                 "status": "success",

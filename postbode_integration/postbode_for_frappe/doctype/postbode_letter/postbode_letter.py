@@ -4,9 +4,17 @@ from frappe.model.document import Document
 import json
 import base64
 
+def ensure_base64_padding(base64_string):
+    """Ensure the base64 string has proper padding."""
+    missing_padding = len(base64_string) % 4
+    if missing_padding:
+        base64_string += "=" * (4 - missing_padding)
+    return base64_string
+
 class PostbodeLetter(Document):
     def validate(self):
         self.validate_required_fields()
+        self.generate_base64_content()
     
     def validate_required_fields(self):
         """Validate that all required fields are filled"""
@@ -24,6 +32,94 @@ class PostbodeLetter(Document):
             frappe.throw(_("Letter Content is required for HTML Content letters"))
         elif self.letter_type == "PDF Attachment" and not self.attachment:
             frappe.throw(_("Attachment is required for PDF Attachment letters"))
+    
+    def generate_base64_content(self):
+        """Generate and store base64 content for the letter."""
+        if self.letter_type == "HTML Content":
+            # Generate PDF from HTML content
+            html_content = self.letter_content
+            if not html_content.strip().lower().startswith("<!doctype") and not html_content.strip().lower().startswith("<html"):
+                html_content = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Letter {self.name}</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; margin: 2cm; }}
+        .header {{ margin-bottom: 2cm; }}
+        .recipient, .sender {{ margin-bottom: 1cm; }}
+        .content {{ line-height: 1.5; }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="sender">
+            {self.sender_company}<br>
+            {self.sender_name}<br>
+            {self.sender_address}<br>
+            {self.sender_postal_code} {self.sender_city}<br>
+            {self.sender_country}
+        </div>
+        <div class="recipient">
+            {self.recipient_company}<br>
+            {self.recipient_name}<br>
+            {self.recipient_address}<br>
+            {self.recipient_postal_code} {self.recipient_city}<br>
+            {self.recipient_country}
+        </div>
+    </div>
+    <div class="content">
+        {self.letter_content}
+    </div>
+</body>
+</html>
+"""
+            try:
+                from frappe.utils.pdf import get_pdf
+                pdf_content = get_pdf(html_content)
+                
+                # Validate that the generated PDF starts with the '%PDF' header
+                if not pdf_content.startswith(b"%PDF"):
+                    frappe.throw(_("Generated PDF content is invalid."))
+                
+                base64_content = base64.b64encode(pdf_content).decode("utf-8")
+                self.base64_content = ensure_base64_padding(base64_content)
+                frappe.logger().debug(f"Generated base64 content for HTML letter: {self.base64_content[:50]}...")  # Log first 50 characters
+            except Exception as e:
+                frappe.log_error(
+                    title=_("PDF Generation Error"),
+                    message=f"Error generating PDF: {str(e)}"
+                )
+                frappe.throw(_("Error generating PDF: {0}").format(str(e)))
+        elif self.letter_type == "PDF Attachment" and self.attachment:
+            try:
+                file_doc = frappe.get_doc("File", {"file_url": self.attachment})
+                file_path = file_doc.get_full_path()
+                
+                # Validate that the file is a PDF
+                if not file_doc.file_name.lower().endswith(".pdf"):
+                    frappe.throw(_("The attached file must be a PDF."))
+                
+                # Read and encode the PDF file as base64
+                with open(file_path, "rb") as f:
+                    pdf_content = f.read()
+                    
+                    # Validate that the file starts with the '%PDF' header
+                    if not pdf_content.startswith(b"%PDF"):
+                        frappe.throw(_("The attached file is not a valid PDF."))
+                    
+                    base64_content = base64.b64encode(pdf_content).decode("utf-8")
+                    self.base64_content = ensure_base64_padding(base64_content)
+                    frappe.logger().debug(f"Generated base64 content for PDF attachment: {self.base64_content[:50]}...")  # Log first 50 characters
+                
+                # Log the size of the encoded content for debugging
+                frappe.logger().debug(f"Base64 content generated for {self.name}, size: {len(self.base64_content)}")
+            except Exception as e:
+                frappe.log_error(
+                    title=_("PDF Attachment Error"),
+                    message=f"Error processing PDF attachment: {str(e)}"
+                )
+                frappe.throw(_("Error processing PDF attachment: {0}").format(str(e)))
     
     @frappe.whitelist()
     def send_letter(self):
@@ -68,6 +164,9 @@ class PostbodeLetter(Document):
             # Prepare payload
             try:
                 payload = client.prepare_letter_payload(self)
+                
+                # Log the payload for debugging
+                frappe.logger().debug(f"Payload before sending: {json.dumps(payload, indent=2)}")
                 
                 # Send letter
                 response = client.send_letter(payload)
@@ -187,30 +286,48 @@ class PostbodeLetter(Document):
 
     @frappe.whitelist()
     def generate_pdf_preview(self):
-        """Generate a PDF preview of the letter"""
+        """Generate a PDF preview of the letter with recipient and sender details"""
         try:
             if self.letter_type != "HTML Content":
                 frappe.throw(_("PDF preview is only available for HTML content letters"))
-                
-            html_content = self.letter_content
             
-            # Ensure it's a complete HTML document
-            if not html_content.strip().lower().startswith("<!doctype") and not html_content.strip().lower().startswith("<html"):
-                html_content = f"""<!DOCTYPE html>
+            # Prepare the letter content with recipient and sender details
+            html_content = f"""
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <title>Letter {self.name}</title>
     <style>
         body {{ font-family: Arial, sans-serif; margin: 2cm; }}
-        p {{ line-height: 1.5; }}
+        .header {{ margin-bottom: 2cm; }}
+        .recipient, .sender {{ margin-bottom: 1cm; }}
+        .content {{ line-height: 1.5; }}
     </style>
 </head>
 <body>
-    {html_content}
+    <div class="header">
+        <div class="sender">
+            {self.sender_company}<br>
+            {self.sender_name}<br>
+            {self.sender_address}<br>
+            {self.sender_postal_code} {self.sender_city}<br>
+            {self.sender_country}
+        </div>
+        <div class="recipient">
+            {self.recipient_company}<br>
+            {self.recipient_name}<br>
+            {self.recipient_address}<br>
+            {self.recipient_postal_code} {self.recipient_city}<br>
+            {self.recipient_country}
+        </div>
+    </div>
+    <div class="content">
+        {self.letter_content}
+    </div>
 </body>
-</html>"""
-            
+</html>
+"""
             # Generate PDF
             from frappe.utils.pdf import get_pdf
             pdf_content = get_pdf(html_content)

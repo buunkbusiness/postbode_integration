@@ -1,269 +1,281 @@
 {
-  "actions": [],
-  "allow_rename": 1,
-  "autoname": "LETTER-.YYYY.-.####",
-  "creation": "2023-07-01 12:00:00.000000",
-  "doctype": "DocType",
-  "engine": "InnoDB",
-  "field_order": [
-    "status_section",
-    "status",
-    "cb_status",
-    "postbode_id",
-    "recipient_section",
-    "recipient_name",
-    "recipient_company",
-    "cb_recipient",
-    "recipient_address",
-    "recipient_postal_code",
-    "recipient_city",
-    "recipient_country",
-    "sender_section",
-    "use_default_sender",
-    "sender_name",
-    "sender_company",
-    "cb_sender",
-    "sender_address",
-    "sender_postal_code",
-    "sender_city",
-    "sender_country",
-    "content_section",
-    "letter_content",
-    "cb_content",
-    "attachment",
-    "letter_type",
-    "delivery_options_section",
-    "color",
-    "double_sided",
-    "tracking_section",
-    "tracking_code",
-    "sent_date",
-    "reference_section",
-    "reference_doctype",
-    "reference_name"
-  ],
-  "fields": [
-    {
-      "fieldname": "status_section",
-      "fieldtype": "Section Break",
-      "label": "Status"
-    },
-    {
-      "fieldname": "status",
-      "fieldtype": "Select",
-      "label": "Status",
-      "options": "Draft\nQueued\nSent\nDelivered\nFailed",
-      "default": "Draft",
-      "reqd": 1
-    },
-    {
-      "fieldname": "cb_status",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "postbode_id",
-      "fieldtype": "Data",
-      "label": "Postbode ID",
-      "read_only": 1
-    },
-    {
-      "fieldname": "recipient_section",
-      "fieldtype": "Section Break",
-      "label": "Recipient"
-    },
-    {
-      "fieldname": "recipient_name",
-      "fieldtype": "Data",
-      "label": "Name",
-      "reqd": 1
-    },
-    {
-      "fieldname": "recipient_company",
-      "fieldtype": "Data",
-      "label": "Company"
-    },
-    {
-      "fieldname": "cb_recipient",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "recipient_address",
-      "fieldtype": "Data",
-      "label": "Address",
-      "reqd": 1
-    },
-    {
-      "fieldname": "recipient_postal_code",
-      "fieldtype": "Data",
-      "label": "Postal Code",
-      "reqd": 1
-    },
-    {
-      "fieldname": "recipient_city",
-      "fieldtype": "Data",
-      "label": "City",
-      "reqd": 1
-    },
-    {
-      "fieldname": "recipient_country",
-      "fieldtype": "Link",
-      "label": "Country",
-      "options": "Country",
-      "reqd": 1
-    },
-    {
-      "fieldname": "sender_section",
-      "fieldtype": "Section Break",
-      "label": "Sender"
-    },
-    {
-      "default": "1",
-      "fieldname": "use_default_sender",
-      "fieldtype": "Check",
-      "label": "Use Default Sender"
-    },
-    {
-      "depends_on": "eval:!doc.use_default_sender",
-      "fieldname": "sender_name",
-      "fieldtype": "Data",
-      "label": "Name"
-    },
-    {
-      "depends_on": "eval:!doc.use_default_sender",
-      "fieldname": "sender_company",
-      "fieldtype": "Data",
-      "label": "Company"
-    },
-    {
-      "fieldname": "cb_sender",
-      "fieldtype": "Column Break"
-    },
-    {
-      "depends_on": "eval:!doc.use_default_sender",
-      "fieldname": "sender_address",
-      "fieldtype": "Data",
-      "label": "Address"
-    },
-    {
-      "depends_on": "eval:!doc.use_default_sender",
-      "fieldname": "sender_postal_code",
-      "fieldtype": "Data",
-      "label": "Postal Code"
-    },
-    {
-      "depends_on": "eval:!doc.use_default_sender",
-      "fieldname": "sender_city",
-      "fieldtype": "Data",
-      "label": "City"
-    },
-    {
-      "depends_on": "eval:!doc.use_default_sender",
-      "fieldname": "sender_country",
-      "fieldtype": "Link",
-      "label": "Country",
-      "options": "Country"
-    },
-    {
-      "fieldname": "content_section",
-      "fieldtype": "Section Break",
-      "label": "Content"
-    },
-    {
-      "fieldname": "letter_content",
-      "fieldtype": "Text Editor",
-      "label": "Letter Content"
-    },
-    {
-      "fieldname": "cb_content",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "attachment",
-      "fieldtype": "Attach",
-      "label": "PDF Attachment"
-    },
-    {
-      "fieldname": "letter_type",
-      "fieldtype": "Select",
-      "label": "Letter Type",
-      "options": "HTML Content\nPDF Attachment",
-      "default": "HTML Content",
-      "reqd": 1
-    },
-    {
-      "fieldname": "delivery_options_section",
-      "fieldtype": "Section Break",
-      "label": "Delivery Options"
-    },
-    {
-      "default": "0",
-      "fieldname": "color",
-      "fieldtype": "Check",
-      "label": "Color Printing"
-    },
-    {
-      "default": "1",
-      "fieldname": "double_sided",
-      "fieldtype": "Check",
-      "label": "Double Sided"
-    },
-    {
-      "fieldname": "tracking_section",
-      "fieldtype": "Section Break",
-      "label": "Tracking"
-    },
-    {
-      "fieldname": "tracking_code",
-      "fieldtype": "Data",
-      "label": "Tracking Code",
-      "read_only": 1
-    },
-    {
-      "fieldname": "sent_date",
-      "fieldtype": "Datetime",
-      "label": "Sent Date",
-      "read_only": 1
-    },
-    {
-      "fieldname": "reference_section",
-      "fieldtype": "Section Break",
-      "label": "Reference"
-    },
-    {
-      "fieldname": "reference_doctype",
-      "fieldtype": "Link",
-      "label": "Reference DocType",
-      "options": "DocType"
-    },
-    {
-      "fieldname": "reference_name",
-      "fieldtype": "Dynamic Link",
-      "label": "Reference Name",
-      "options": "reference_doctype"
-    }
-  ],
-  "index_web_pages_for_search": 1,
-  "links": [],
-  "modified": "2023-07-01 12:00:00.000000",
-  "module": "Postbode for Frappe",
-  "name": "Postbode Letter",
-  "naming_rule": "Expression",
-  "owner": "Administrator",
-  "permissions": [
-    {
-      "create": 1,
-      "delete": 1,
-      "email": 1,
-      "export": 1,
-      "print": 1,
-      "read": 1,
-      "report": 1,
-      "role": "System Manager",
-      "share": 1,
-      "write": 1
-    }
-  ],
-  "sort_field": "modified",
-  "sort_order": "DESC",
-  "states": []
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "LETTER-.YYYY.-.####",
+ "creation": "2023-07-01 12:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "status_section",
+  "status",
+  "cb_status",
+  "postbode_id",
+  "recipient_section",
+  "recipient_name",
+  "recipient_company",
+  "cb_recipient",
+  "recipient_address",
+  "recipient_postal_code",
+  "recipient_city",
+  "recipient_country",
+  "sender_section",
+  "use_default_sender",
+  "sender_name",
+  "sender_company",
+  "cb_sender",
+  "sender_address",
+  "sender_postal_code",
+  "sender_city",
+  "sender_country",
+  "content_section",
+  "letter_content",
+  "cb_content",
+  "attachment",
+  "letter_type",
+  "base64_content",
+  "delivery_options_section",
+  "color",
+  "double_sided",
+  "tracking_section",
+  "tracking_code",
+  "sent_date",
+  "reference_section",
+  "reference_doctype",
+  "reference_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "status_section",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Draft\nQueued\nSent\nDelivered\nFailed",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_status",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "postbode_id",
+   "fieldtype": "Data",
+   "label": "Postbode ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "recipient_section",
+   "fieldtype": "Section Break",
+   "label": "Recipient"
+  },
+  {
+   "fieldname": "recipient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "recipient_company",
+   "fieldtype": "Data",
+   "label": "Company"
+  },
+  {
+   "fieldname": "cb_recipient",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "recipient_address",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Address",
+   "reqd": 1
+  },
+  {
+   "fieldname": "recipient_postal_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Postal Code",
+   "reqd": 1
+  },
+  {
+   "fieldname": "recipient_city",
+   "fieldtype": "Data",
+   "label": "City",
+   "reqd": 1
+  },
+  {
+   "fieldname": "recipient_country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sender_section",
+   "fieldtype": "Section Break",
+   "label": "Sender"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_default_sender",
+   "fieldtype": "Check",
+   "label": "Use Default Sender"
+  },
+  {
+   "depends_on": "eval:!doc.use_default_sender",
+   "fieldname": "sender_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "depends_on": "eval:!doc.use_default_sender",
+   "fieldname": "sender_company",
+   "fieldtype": "Data",
+   "label": "Company"
+  },
+  {
+   "fieldname": "cb_sender",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:!doc.use_default_sender",
+   "fieldname": "sender_address",
+   "fieldtype": "Data",
+   "label": "Address"
+  },
+  {
+   "depends_on": "eval:!doc.use_default_sender",
+   "fieldname": "sender_postal_code",
+   "fieldtype": "Data",
+   "label": "Postal Code"
+  },
+  {
+   "depends_on": "eval:!doc.use_default_sender",
+   "fieldname": "sender_city",
+   "fieldtype": "Data",
+   "label": "City"
+  },
+  {
+   "depends_on": "eval:!doc.use_default_sender",
+   "fieldname": "sender_country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country"
+  },
+  {
+   "fieldname": "content_section",
+   "fieldtype": "Section Break",
+   "label": "Content"
+  },
+  {
+   "fieldname": "letter_content",
+   "fieldtype": "Text Editor",
+   "label": "Letter Content"
+  },
+  {
+   "fieldname": "cb_content",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "attachment",
+   "fieldtype": "Attach",
+   "label": "PDF Attachment"
+  },
+  {
+   "default": "HTML Content",
+   "fieldname": "letter_type",
+   "fieldtype": "Select",
+   "label": "Letter Type",
+   "options": "HTML Content\nPDF Attachment",
+   "reqd": 1
+  },
+  {
+   "fieldname": "delivery_options_section",
+   "fieldtype": "Section Break",
+   "label": "Delivery Options"
+  },
+  {
+   "default": "0",
+   "fieldname": "color",
+   "fieldtype": "Check",
+   "label": "Color Printing"
+  },
+  {
+   "default": "1",
+   "fieldname": "double_sided",
+   "fieldtype": "Check",
+   "label": "Double Sided"
+  },
+  {
+   "fieldname": "tracking_section",
+   "fieldtype": "Section Break",
+   "label": "Tracking"
+  },
+  {
+   "fieldname": "tracking_code",
+   "fieldtype": "Data",
+   "label": "Tracking Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sent_date",
+   "fieldtype": "Datetime",
+   "label": "Sent Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "label": "Reference DocType",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference Name",
+   "options": "reference_doctype"
+  },
+  {
+   "fieldname": "base64_content",
+   "fieldtype": "Long Text",
+   "label": "Base64 Content"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-05-12 14:16:36.160834",
+ "modified_by": "Administrator",
+ "module": "Postbode for Frappe",
+ "name": "Postbode Letter",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
 }

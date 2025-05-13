@@ -205,7 +205,20 @@ class PostbodeClient:
         try:
             frappe.logger().debug(f"Making {method} request to {url}")
             if data:
-                frappe.logger().debug(f"Request payload: {json.dumps(data, indent=2)}")
+                # Log the payload for debugging
+                debug_data = data.copy()
+                if "documents" in debug_data:
+                    for doc in debug_data["documents"]:
+                        if "content" in doc:
+                            # Ensure proper padding for base64 content
+                            doc["content"] = ensure_base64_padding(doc["content"])
+                            
+                            # Validate that the content is base64-encoded and starts with '%PDF'
+                            decoded_content = base64.b64decode(doc["content"])
+                            if not decoded_content.startswith(b"%PDF"):
+                                frappe.throw(_("Document content is not a valid PDF."))
+                            doc["content"] = f"[BASE64 ENCODED CONTENT, LENGTH: {len(doc['content'])}]"
+                    frappe.logger().debug(f"Request payload: {json.dumps(debug_data, indent=2)}")
             
             if method.lower() == "get":
                 response = self.session.get(url)
@@ -214,46 +227,23 @@ class PostbodeClient:
             else:
                 raise ValueError(f"Unsupported HTTP method: {method}")
             
-            # Log the full response for debugging
-            frappe.logger().debug(f"Response status: {response.status_code}")
-            frappe.logger().debug(f"Response headers: {response.headers}")
-            frappe.logger().debug(f"Response body: {response.text}")
-            
+            # Check response status
             if response.status_code >= 200 and response.status_code < 300:
                 try:
-                    return json.loads(response.content)
+                    return response.json()
                 except json.JSONDecodeError:
-                    # Handle case where response isn't JSON
+                    frappe.logger().error(f"Non-JSON response: {response.text}")
                     return {"status": "success", "message": "Operation completed successfully"}
             else:
                 error_msg = f"HTTP {response.status_code} calling {url}"
-                error_details = f"\nResponse: {response.text}"
-                
-                # Log the error details
-                frappe.log_error(
-                    title=_("Postbode API Error"),
-                    message=f"{error_msg}{error_details}\nRequest data: {json.dumps(data) if data else 'None'}"
-                )
-                
-                # For client-friendly errors, try to extract message from response
+                frappe.logger().error(f"{error_msg}\nResponse: {response.text}")
                 try:
                     error_json = response.json()
-                    if 'message' in error_json:
-                        error_message = error_json['message']
-                    elif 'error' in error_json:
-                        error_message = error_json['error']
-                    else:
-                        error_message = error_msg
-                except:
-                    error_message = f"{error_msg}. Check the error logs for more details."
-                
-                raise Exception(error_message)
-                
+                    raise Exception(error_json.get("message", error_msg))
+                except json.JSONDecodeError:
+                    raise Exception(error_msg)
         except requests.exceptions.RequestException as e:
-            frappe.log_error(
-                title=_("Postbode API Request Error"),
-                message=f"Error making request to {url}: {str(e)}\nRequest data: {json.dumps(data) if data else 'None'}"
-            )
+            frappe.logger().error(f"Request error: {str(e)}")
             raise
     
     def get_mailboxes(self):
@@ -331,110 +321,55 @@ class PostbodeClient:
         # Create recipient address object
         recipient_address = {
             "name": getattr(letter_doc, "recipient_name", ""),
-            "company": getattr(letter_doc, "recipient_company", "") or "",
             "street": getattr(letter_doc, "recipient_address", ""),
             "postal_code": getattr(letter_doc, "recipient_postal_code", ""),
             "city": getattr(letter_doc, "recipient_city", ""),
-            "country": country_code
+            "country": country_code,
+            "blanco_page": False  # Default to False
         }
         
         # Set up the payload according to v2 API documentation
         payload = {
             "mailbox": mailbox_code,
+            "customer_reference": f"{letter_doc.reference_doctype}:{letter_doc.reference_name}" if hasattr(letter_doc, "reference_doctype") and hasattr(letter_doc, "reference_name") else None,
             "type": "outbound_letter",
             "envelope": settings.default_envelope_uuid,  # From settings
             "shipping": "NL_FAST",  # Default shipping option
             "printing": color_printing,
-            "plex": plex, 
+            "plex": plex,
             "paper_type": "A4_90",  # Default paper type
+            "metadata": {
+                "invoice_id": getattr(letter_doc, "invoice_id", None),
+                "customer_id": getattr(letter_doc, "customer_id", None)
+            },
+            "tags": getattr(letter_doc, "tags", []),  # Optional tags
             "send": True,  # Actually send the letter
             "cover_address": recipient_address,
             "documents": []  # Will be filled below
         }
         
-        # Add customer reference if available
-        if hasattr(letter_doc, "reference_doctype") and hasattr(letter_doc, "reference_name"):
-            payload["customer_reference"] = f"{letter_doc.reference_doctype}:{letter_doc.reference_name}"
+        # Add document to payload with base64 content
+        if not letter_doc.base64_content:
+            frappe.throw(_("Base64 content is missing. Please regenerate the letter content."))
         
-        # Handle the document content
+        # Validate that the base64 content decodes to a valid PDF
         try:
-            if letter_doc.letter_type == "HTML Content":
-                # First, convert HTML to PDF
-                html_content = getattr(letter_doc, "letter_content", "")
-                
-                # Ensure it's a complete HTML document
-                if not html_content.strip().lower().startswith("<!doctype") and not html_content.strip().lower().startswith("<html"):
-                    html_content = f"""<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Letter {letter_doc.name}</title>
-    <style>
-        body {{ font-family: Arial, sans-serif; margin: 2cm; }}
-        p {{ line-height: 1.5; }}
-    </style>
-</head>
-<body>
-    {html_content}
-</body>
-</html>"""
-                
-                # Generate PDF from HTML using Frappe's PDF utility
-                try:
-                    from frappe.utils.pdf import get_pdf
-                    pdf_content = get_pdf(html_content)
-                    
-                    # Encode the PDF content
-                    encoded_content = base64.b64encode(pdf_content).decode('utf-8')
-                    
-                    # Add document to payload with PDF extension
-                    payload["documents"].append({
-                        "filename": f"Letter-{letter_doc.name}.pdf",
-                        "content": encoded_content
-                    })
-                except Exception as e:
-                    frappe.log_error(
-                        title=_("HTML to PDF Conversion Error"),
-                        message=f"Error converting HTML to PDF: {str(e)}\nHTML Content: {html_content[:500]}..."
-                    )
-                    raise ValueError(f"Error converting HTML to PDF: {str(e)}")
-                
-            elif letter_doc.letter_type == "PDF Attachment":
-                # Handle PDF attachment
-                try:
-                    # Get the file attachment
-                    file_doc = frappe.get_doc("File", {"file_name": letter_doc.attachment})
-                    file_path = frappe.get_site_path() + file_doc.file_url
-                    
-                    # Validate file exists
-                    if not os.path.exists(file_path):
-                        raise ValueError(f"PDF file not found at {file_path}")
-                    
-                    # Read and encode the PDF file
-                    with open(file_path, "rb") as f:
-                        encoded_content = base64.b64encode(f.read()).decode('utf-8')
-                    
-                    # Add document to payload
-                    payload["documents"].append({
-                        "filename": letter_doc.attachment,
-                        "content": encoded_content
-                    })
-                except Exception as e:
-                    frappe.log_error(
-                        title=_("Postbode PDF Attachment Error"),
-                        message=f"Error processing PDF attachment: {str(e)}"
-                    )
-                    raise ValueError(f"Error processing PDF attachment: {str(e)}")
-            else:
-                raise ValueError(f"Unsupported letter type: {letter_doc.letter_type}")
+            decoded_content = base64.b64decode(letter_doc.base64_content)
+            if not decoded_content.startswith(b"%PDF"):
+                frappe.throw(_("The base64 content is not a valid PDF. Please check the attachment."))
         except Exception as e:
             frappe.log_error(
-                title=_("Postbode Payload Preparation Error"),
-                message=f"Error preparing payload for letter {letter_doc.name}: {str(e)}"
+                title=_("Base64 Validation Error"),
+                message=f"Error validating base64 content: {str(e)}"
             )
-            raise
+            frappe.throw(_("Error validating base64 content: {0}").format(str(e)))
         
-        # Log the complete payload for debugging (without the encoded content)
+        payload["documents"].append({
+            "filename": f"Letter-{letter_doc.name}.pdf" if letter_doc.letter_type == "HTML Content" else letter_doc.attachment,
+            "content": letter_doc.base64_content
+        })
+        
+        # Log the complete payload for debugging
         debug_payload = payload.copy()
         if "documents" in debug_payload:
             for doc in debug_payload["documents"]:
